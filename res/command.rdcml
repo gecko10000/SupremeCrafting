@@ -1,0 +1,3 @@
+supremecrafting,sc {
+    permission sc.command
+}
