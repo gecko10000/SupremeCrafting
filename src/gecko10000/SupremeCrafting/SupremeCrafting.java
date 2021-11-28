@@ -9,6 +9,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
+import redempt.redlib.itemutils.ItemBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +23,9 @@ public class SupremeCrafting extends JavaPlugin {
     public void onEnable() {
         instance = this;
         new Listeners();
-        ShapedCustomRecipe recipe = new ShapedCustomRecipe(new ItemStack(Material.BEDROCK));
+        ShapedCustomRecipe recipe = new ShapedCustomRecipe(new ItemBuilder(Material.BEDROCK).setCount(64));
         recipe.ingredients[0][0] = new MaterialSelection(Material.YELLOW_DYE);
+        recipe.ingredients[1][0] = new MaterialSelection(Material.BEACON);
         recipes.put("test", recipe);
     }
 

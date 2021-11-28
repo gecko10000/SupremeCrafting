@@ -3,6 +3,8 @@ package gecko10000.SupremeCrafting;
 import gecko10000.SupremeCrafting.misc.Utils;
 import gecko10000.SupremeCrafting.recipes.CustomRecipe;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,15 +23,8 @@ public class Listeners implements Listener {
 
     @EventHandler
     public void on(PrepareItemCraftEvent evt) {
-        Bukkit.broadcastMessage("prepareitemcraft");
         CraftingInventory inv = evt.getInventory();
         ItemStack[] matrix = inv.getMatrix();
-        for (ItemStack item : matrix) {
-            if (item == null) {
-                continue;
-            }
-            Bukkit.broadcastMessage(item.toString());
-        }
         for (Map.Entry<String, CustomRecipe> recipe : SupremeCrafting.getInstance().recipes.entrySet()) {
             if (!recipe.getValue().test(matrix)) {
                 continue;
@@ -40,7 +35,6 @@ public class Listeners implements Listener {
 
     @EventHandler
     public void onCraft(InventoryClickEvent evt) {
-        Bukkit.broadcastMessage("inventoryclick");
         Inventory clickedInv = evt.getClickedInventory();
         if (!(clickedInv instanceof CraftingInventory inv) || evt.getSlot() != 0) {
             return;
@@ -59,11 +53,32 @@ public class Listeners implements Listener {
                 if (!Utils.isEmpty(alreadyOnCursor) && !alreadyOnCursor.isSimilar(result)) {
                     break;
                 }
-                view.setCursor(new ItemBuilder(result).setCount(Utils.isEmpty(alreadyOnCursor) ? 1 : alreadyOnCursor.getAmount() + 1));
+                view.setCursor(new ItemBuilder(result)
+                        .setCount(Utils.isEmpty(alreadyOnCursor)
+                                ? result.getAmount()
+                                : alreadyOnCursor.getAmount() + result.getAmount()));
                 decrementMatrix(inv);
-                inv.setResult(null);
+            }
+            case SHIFT_LEFT, SHIFT_RIGHT -> {
+                int iterations = timesToCraft(inv);
+                for (int i = 0; i < iterations; i++) {
+                    int remaining = shiftCraft(result.clone(), playerInv);
+                    if (remaining == result.getAmount()) {
+                        break;
+                    }
+                    decrementMatrix(inv);
+                    if (remaining == 0) {
+                        continue;
+                    }
+                    Location location = player.getLocation();
+                    Item item = location.getWorld().dropItem(location, new ItemBuilder(result).setCount(remaining));
+                    item.setPickupDelay(20);
+                    item.setVelocity(location.getDirection());
+                    break;
+                }
             }
         }
+        inv.setResult(null);
         Bukkit.getPluginManager().callEvent(new PrepareItemCraftEvent(inv ,view, false));
     }
 
@@ -74,6 +89,22 @@ public class Listeners implements Listener {
             }
             item.setAmount(item.getAmount() - 1);
         }
+    }
+
+    public int timesToCraft(CraftingInventory inv) {
+        int min = 64;
+        for (ItemStack item : inv.getMatrix()) {
+            if (Utils.isEmpty(item)) {
+                continue;
+            }
+            min = Math.min(min, item.getAmount());
+        }
+        return min;
+    }
+
+    public int shiftCraft(ItemStack result, PlayerInventory playerInv) {
+        Map<Integer, ItemStack> extra = Utils.shiftClickAddItem(playerInv, result.clone());
+        return extra.size() == 0 ? 0 : extra.get(0).getAmount();
     }
 
 }
