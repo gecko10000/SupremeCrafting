@@ -50,7 +50,7 @@ public class ShapedCustomRecipe extends CustomRecipe {
         int sqrt = (int) Math.sqrt(items.length);
         ItemStack[][] twoD = new ItemStack[sqrt][sqrt];
         for (int i = 0; i < sqrt; i++) {
-            System.arraycopy(items, i * 3, twoD[i], 0, sqrt);
+            System.arraycopy(items, i * sqrt, twoD[i], 0, sqrt);
         }
         return test(twoD);
     }
