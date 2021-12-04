@@ -22,7 +22,7 @@ public class Listeners implements Listener {
     }
 
     @EventHandler
-    public void on(PrepareItemCraftEvent evt) {
+    public void onPrepareRecipe(PrepareItemCraftEvent evt) {
         CraftingInventory inv = evt.getInventory();
         ItemStack[] matrix = inv.getMatrix();
         for (Map.Entry<String, CustomRecipe> recipe : SupremeCrafting.getInstance().recipes.entrySet()) {
@@ -33,14 +33,14 @@ public class Listeners implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler (ignoreCancelled = true)
     public void onCraft(InventoryClickEvent evt) {
         Inventory clickedInv = evt.getClickedInventory();
         if (!(clickedInv instanceof CraftingInventory inv) || evt.getSlot() != 0) {
             return;
         }
         ItemStack result = inv.getResult();
-        if (result == null) {
+        if (Utils.isEmpty(result)) {
             return;
         }
         evt.setCancelled(true);

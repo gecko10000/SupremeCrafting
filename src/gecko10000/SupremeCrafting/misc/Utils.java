@@ -3,12 +3,15 @@ package gecko10000.SupremeCrafting.misc;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class Utils {
 
@@ -16,6 +19,23 @@ public class Utils {
         return item == null || item.getType() == Material.AIR;
     }
 
+    public static Map<Enchantment, Integer> getEnchants(ItemStack item) {
+        if (isEmpty(item)) {
+            return new HashMap<>();
+        }
+        if (item.getItemMeta() instanceof EnchantmentStorageMeta storageMeta) {
+            return storageMeta.getStoredEnchants();
+        }
+        return item.getEnchantments();
+    }
+
+    public static List<PotionEffect> getPotionEffects(PotionMeta meta) {
+        return meta.hasCustomEffects() ? meta.getCustomEffects() : new ArrayList<>();
+    }
+
+    public static int getCustomModelData(ItemMeta meta) {
+        return meta.hasCustomModelData() ? meta.getCustomModelData() : -1;
+    }
 
     public static Map<Integer, ItemStack> shiftClickAddItem(Inventory inv, ItemStack... items) {
         Validate.noNullElements(items, "Item cannot be null");
@@ -102,7 +122,7 @@ public class Utils {
                 index = 36;
             }
             index--;
-            if (Utils.isEmpty(contents[index])) {
+            if (isEmpty(contents[index])) {
                 return index;
             }
         } while (index != 9);
