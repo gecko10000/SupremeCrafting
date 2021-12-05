@@ -1,5 +1,7 @@
 package gecko10000.SupremeCrafting.selections;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import redempt.redlib.configmanager.ConfigManager;
 import redempt.redlib.configmanager.annotations.ConfigMappable;
@@ -21,15 +23,21 @@ public class RecipeSelection implements Predicate<ItemStack> {
     public final List<ItemStack> validItems = ConfigManager.list(ItemStack.class);
     @ConfigValue
     public Set<ComparisonType> comparisons = ConfigManager.set(ComparisonType.class, ComparisonType.MATERIAL);
+    @ConfigValue
+    private String data = null;
 
     public RecipeSelection() {}
 
+    public RecipeSelection(Material material) {
+        this(new ItemStack(material));
+    }
+
     public RecipeSelection(ItemStack item) {
-        validItems.add(item);
+        add(item);
     }
 
     public RecipeSelection add(ItemStack item) {
-        validItems.add(item);
+        validItems.add(new ItemStack(item));
         return this;
     }
 
@@ -48,11 +56,20 @@ public class RecipeSelection implements Predicate<ItemStack> {
         return this;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public RecipeSelection setData(String data) {
+        this.data = data;
+        return this;
+    }
+
     @Override
     public boolean test(ItemStack item) {
         return comparisons.contains(ComparisonType.EXACT)
-                ? ComparisonType.EXACT.test(validItems, item)
-                : comparisons.stream().allMatch(t -> t.test(validItems, item));
+                ? ComparisonType.EXACT.test(validItems, item, data)
+                : comparisons.stream().allMatch(t -> t.test(validItems, item, data));
     }
 
     @Override

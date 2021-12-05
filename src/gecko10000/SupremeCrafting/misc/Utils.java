@@ -1,5 +1,9 @@
 package gecko10000.SupremeCrafting.misc;
 
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
+import de.tr7zw.changeme.nbtapi.NBTItem;
+import de.tr7zw.changeme.nbtapi.NBTListCompound;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -37,6 +41,15 @@ public class Utils {
         return meta.hasCustomModelData() ? meta.getCustomModelData() : -1;
     }
 
+    public static String getTexture(ItemStack head) {
+        return Optional.ofNullable(new NBTItem(head).getCompound("SkullOwner"))
+                .map(c -> c.getCompound("Properties"))
+                .map(c -> c.getCompoundList("textures"))
+                .map(l -> l.get(0))
+                .map(t -> t.getString("Value")).orElse("");
+    }
+
+    // definitely not adapted from Spigot
     public static Map<Integer, ItemStack> shiftClickAddItem(Inventory inv, ItemStack... items) {
         Validate.noNullElements(items, "Item cannot be null");
         HashMap<Integer, ItemStack> leftover = new HashMap<>();

@@ -1,6 +1,7 @@
 package gecko10000.SupremeCrafting.recipes;
 
 import gecko10000.SupremeCrafting.selections.RecipeSelection;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import redempt.redlib.configmanager.ConfigManager;
 import redempt.redlib.configmanager.annotations.ConfigValue;
@@ -38,7 +39,7 @@ public class ShapedCustomRecipe extends CustomRecipe {
         shave();
     }
 
-    public void shave() {
+    private void shave() {
         ingredients = shaveNull(ingredients, (w, h) -> new RecipeSelection[h][w]);
     }
 

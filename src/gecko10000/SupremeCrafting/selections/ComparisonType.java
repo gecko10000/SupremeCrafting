@@ -1,6 +1,9 @@
 package gecko10000.SupremeCrafting.selections;
 
+import de.tr7zw.changeme.nbtapi.NBTItem;
+import gecko10000.SupremeCrafting.misc.TriFunction;
 import gecko10000.SupremeCrafting.misc.Utils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
@@ -8,23 +11,21 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public enum ComparisonType {
 
-    MATERIAL((validItems, item) -> {
+    MATERIAL((validItems, item, nbt) -> {
         Material type = item.getType();
         return validItems.map(ItemStack::getType).anyMatch(m -> type == m);
     }),
-    ENCHANTMENT((validItems, item) -> {
+    ENCHANTMENT((validItems, item, nbt) -> {
         Map<Enchantment, Integer> enchants = Utils.getEnchants(item);
         return validItems.map(Utils::getEnchants).anyMatch(e -> e.equals(enchants));
     }),
-    POTION((validItems, item) -> {
+    POTION((validItems, item, nbt) -> {
         if (!(item.getItemMeta() instanceof PotionMeta meta)) {
             return true;
         }
@@ -35,22 +36,29 @@ public enum ComparisonType {
                 .map(PotionMeta.class::cast)
                 .anyMatch(m -> data.equals(m.getBasePotionData()) && effects.containsAll(Utils.getPotionEffects(m)));
     }),
-    CUSTOM_MODEL_DATA((validItems, item) -> {
+    CUSTOM_MODEL_DATA((validItems, item, nbt) -> {
         int data = Utils.getCustomModelData(item.getItemMeta());
         return validItems.map(ItemStack::getItemMeta)
                 .map(Utils::getCustomModelData)
                 .anyMatch(i -> i == data);
     }),
-    EXACT((validItems, item) -> validItems.anyMatch(item::isSimilar));
+    SKULL((validItems, item, nbt) -> {
+        String texture = Utils.getTexture(item);
+        return validItems
+                .filter(i -> i.getType() == Material.PLAYER_HEAD)
+                .map(Utils::getTexture)
+                .anyMatch(texture::equals);
+    }),
+    EXACT((validItems, item, nbt) -> validItems.anyMatch(item::isSimilar));
 
-    BiFunction<Stream<ItemStack>, ItemStack, Boolean> comparison;
+    TriFunction<Stream<ItemStack>, ItemStack, String, Boolean> comparison;
 
-    ComparisonType(BiFunction<Stream<ItemStack>, ItemStack, Boolean> comparison) {
+    ComparisonType(TriFunction<Stream<ItemStack>, ItemStack, String, Boolean> comparison) {
         this.comparison = comparison;
     }
 
-    boolean test(List<ItemStack> validItems, ItemStack item) {
-        return comparison.apply(validItems.stream(), item);
+    boolean test(List<ItemStack> validItems, ItemStack item, String nbt) {
+        return comparison.apply(validItems.stream(), item, nbt);
     }
 
 }
