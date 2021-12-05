@@ -45,7 +45,10 @@ public class Utils {
         return Optional.ofNullable(new NBTItem(head).getCompound("SkullOwner"))
                 .map(c -> c.getCompound("Properties"))
                 .map(c -> c.getCompoundList("textures"))
-                .map(l -> l.get(0))
+                .map(l -> l.stream()
+                        .filter(c -> c.getString("Value") != null)
+                        .findFirst()
+                        .orElse(null))
                 .map(t -> t.getString("Value")).orElse("");
     }
 
