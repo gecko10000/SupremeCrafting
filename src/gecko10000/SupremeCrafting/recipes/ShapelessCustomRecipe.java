@@ -50,9 +50,6 @@ public class ShapelessCustomRecipe extends CustomRecipe {
             if (!foundMatch) {
                 return false;
             }
-            if (requiredClone.isEmpty()) {
-                break;
-            }
         }
         return requiredClone.isEmpty();
     }
