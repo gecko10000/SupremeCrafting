@@ -5,14 +5,19 @@ import gecko10000.SupremeCrafting.misc.TriFunction;
 import gecko10000.SupremeCrafting.misc.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 public enum ComparisonType {
@@ -36,7 +41,7 @@ public enum ComparisonType {
                 .map(PotionMeta.class::cast)
                 .anyMatch(m -> data.equals(m.getBasePotionData()) && effects.containsAll(Utils.getPotionEffects(m)));
     }),
-    CUSTOM_MODEL_DATA((validItems, item, nbt) -> {
+    CM_DATA((validItems, item, nbt) -> {
         int data = Utils.getCustomModelData(item.getItemMeta());
         return validItems.map(ItemStack::getItemMeta)
                 .map(Utils::getCustomModelData)
@@ -48,6 +53,16 @@ public enum ComparisonType {
                 .filter(i -> i.getType() == Material.PLAYER_HEAD)
                 .map(Utils::getTexture)
                 .anyMatch(texture::equals);
+    }),
+    PDC((validItems, item, nbt) -> {
+        PersistentDataContainer pdc = Utils.getPDC(item);
+        return validItems.map(Utils::getPDC).anyMatch(pdc::equals);
+    }),
+    PDC_KEYS((validItems, item, nbt) -> {
+        Set<NamespacedKey> keys = Utils.getPDC(item).getKeys();
+        return validItems.map(Utils::getPDC)
+                .map(PersistentDataContainer::getKeys)
+                .anyMatch(keys::equals);
     }),
     EXACT((validItems, item, nbt) -> validItems.anyMatch(item::isSimilar));
 
