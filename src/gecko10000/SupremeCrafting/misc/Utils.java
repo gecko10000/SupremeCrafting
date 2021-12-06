@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.*;
@@ -50,6 +51,10 @@ public class Utils {
                         .findFirst()
                         .orElse(null))
                 .map(t -> t.getString("Value")).orElse("");
+    }
+
+    public static PersistentDataContainer getPDC(ItemStack item) {
+        return item.getItemMeta().getPersistentDataContainer();
     }
 
     // definitely not adapted from Spigot
